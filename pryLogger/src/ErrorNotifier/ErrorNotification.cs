@@ -42,9 +42,9 @@ namespace pryLogger.src.ErrorNotifier
             return new ErrorNotification()
             {
                 IpAdresses = ipAddresses.ToArray(),
-                ErrorMessage = errLog.Error.Message,
                 JsonError = log.ToJson(Formatting.Indented),
                 Title = $"Error Detected At {errLog.Method}",
+                ErrorMessage = $"At {Environment.CurrentDirectory}",
             };
         }
 
@@ -72,7 +72,7 @@ namespace pryLogger.src.ErrorNotifier
 
                 foreach (string ipAddress in IpAdresses)
                 {
-                    html += $"<tr><td>{ipAddress}</td></tr>";
+                    html += $@"<tr><td><a href=""{ipAddress}"">{ipAddress}</a></td></tr>";
                 }
 
                 html += "</tbody></table>";

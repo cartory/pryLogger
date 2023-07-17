@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 using ArxOne.MrAdvice.Advice;
 using pryLogger.src.ErrorNotifier;
-using pryLogger.src.ErrorNotifier.MailNotifier;
-using ArxOne.MrAdvice.Annotation;
-using System.Dynamic;
 
 namespace pryLogger.src.Attributes
 {
@@ -18,7 +15,7 @@ namespace pryLogger.src.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public abstract class LogAttribute : Attribute
+    public abstract class LogAttribute : Attribute, IMethodAdvice
     {
         protected static readonly List<LogEvent> RootLogs = new List<LogEvent>();
         protected static readonly Stack<LogEvent> CurrentLogs = new Stack<LogEvent>();
@@ -36,8 +33,47 @@ namespace pryLogger.src.Attributes
         protected LogAttribute(string onExceptionName) : base() => this.OnExceptionName = onExceptionName;
 
         public abstract void LogAndNotify(LogEvent logEvent);
-        public abstract void OnAdvice(string methodName, Action<LogEvent> callback);
-        public abstract T OnAdvice<T>(string methodName, Func<LogEvent, T> callback);
+
+        public virtual void OnAdvice(string methodName, Action<LogEvent> callback) 
+        {
+            this.OnAdvice(methodName, log =>
+            {
+                callback(log);
+                return 0;
+            });
+        }
+
+        public virtual T OnAdvice<T>(string methodName, Func<LogEvent, T> callback) 
+        {
+            int index = -1;
+            LogEvent logEvent = new LogEvent(methodName, Environment.StackTrace);
+            LogEvent currLog = CurrentRootLog?.GetFather(logEvent, isLambdaLog: true);
+
+            if (currLog != null)
+            {
+                currLog.GetEvents().Add(logEvent);
+            }
+            else
+            {
+                RootLogs.Add(logEvent);
+                index = RootLogs.Count - 1;
+            }
+
+            CurrentLogs.Push(logEvent);
+            var result = callback(logEvent);
+
+            logEvent.Finish();
+            CurrentLogs.PopOrDefault();
+
+            if (index >= 0)
+            {
+                LogAndNotify(logEvent);
+                RootLogs.RemoveAt(index);
+            }
+
+            logEvent.Returns = result;
+            return result;
+        }
 
         protected virtual Dictionary<string, object> GetMethodParams(MethodAdviceContext context)
         {
@@ -75,6 +111,67 @@ namespace pryLogger.src.Attributes
             }
 
             return paramsNameValue;
+        }
+
+        public void Advise(MethodAdviceContext context)
+        {
+            lock (this)
+            {
+                string method = $"{context.TargetType.FullName}.{context.TargetMethod.Name}";
+
+                LogEvent logEvent = new LogEvent(method, Environment.StackTrace);
+                Dictionary<string, object> parameters = this.GetMethodParams(context);
+
+                int index = -1;
+                object onErrorReturn = null;
+
+                CurrentLogs.Push(logEvent);
+                LogEvent currLog = CurrentRootLog?.GetFather(logEvent);
+
+                if (currLog != null)
+                {
+                    currLog.GetEvents().Add(logEvent);
+                }
+                else
+                {
+                    RootLogs.Add(logEvent);
+                    index = RootLogs.Count - 1;
+                }
+
+                try
+                {
+                    if (parameters.Count > 0)
+                    {
+                        logEvent.Params = parameters;
+                    }
+
+                    context.Proceed();
+                }
+                catch (Exception e)
+                {
+                    Type type = context.TargetType;
+                    MethodInfo methodInfo = type.GetMethod(this.OnExceptionName);
+
+                    if (methodInfo == null) throw;
+
+                    logEvent.Error = Error.FromException(e);
+                    onErrorReturn = methodInfo.Invoke(context.Target, new object[] { e });
+                }
+
+                if (context.HasReturnValue)
+                {
+                    logEvent.Returns = onErrorReturn ?? context.ReturnValue;
+                }
+
+                logEvent.Finish();
+                CurrentLogs.PopOrDefault();
+
+                if (index >= 0)
+                {
+                    LogAndNotify(logEvent);
+                    RootLogs.RemoveAt(index);
+                }
+            }
         }
     }
 }

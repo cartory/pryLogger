@@ -31,11 +31,22 @@ namespace pryLogger.src
         [JsonProperty("error")]
         public Error Error { get; set; }
 
-        [JsonIgnore]
-        public List<LogEvent> InnerLogs => this.Events?.Where(e => e is LogEvent).Select(e => (LogEvent)e).ToList();
-
         [JsonProperty("returns")]
         public object Returns { get; set; }
+
+        public List<IEvent> GetEvents()
+        {
+            Events = Events ?? new List<IEvent>();
+            return Events;
+        }
+
+        public List<LogEvent> GetInnerLogs()
+        {
+            return Events?
+                .Where(e => e is LogEvent)
+                .Select(e => (LogEvent)e)
+                .ToList();
+        }
 
         public void SetParams(params object[] args)
         {
@@ -107,9 +118,11 @@ namespace pryLogger.src
             }
             else
             {
-                if (InnerLogs != null)
+                var innerLogs = GetInnerLogs();
+
+                if (innerLogs != null)
                 {
-                    foreach (var inner in InnerLogs)
+                    foreach (var inner in innerLogs)
                     {
                         hasError = inner.HasError(out errLog);
 
@@ -128,39 +141,35 @@ namespace pryLogger.src
         public LogEvent GetFather(LogEvent child, bool isLambdaLog = false)
         {
             LogEvent logFather = null;
+            string currStackTrace = this.StackTrace.FirstOrDefault();
 
             if (isLambdaLog)
             {
-                if (this.StackTrace.Length > 0 && child.StackTrace.Length > 0)
+                if (child.StackTrace.FirstOrDefault()?.StartsWith(currStackTrace) ?? false)
                 {
-                    if (this.StackTrace[0].Equals(child.StackTrace[0]))
-                    {
-                        return this;
-                    }
+                    return this;
                 }
             }
 
             if (child.StackTrace.Length > 1)
             {
-                string[] childStackTrace = child.StackTrace;
-                string currStackTrace = this.StackTrace.FirstOrDefault();
-
                 for (int index = 1; index < child.StackTrace.Length; index++)
                 {
-                    if (childStackTrace[index].StartsWith(currStackTrace))
+                    if (child.StackTrace[index].StartsWith(currStackTrace))
                     {
-                        if (index == 1)
+                        if (index < 2 && !isLambdaLog)
                         {
                             logFather = this;
                             break;
                         }
                         else
                         {
-                            if (InnerLogs == null) continue;
+                            var innerLogs = GetInnerLogs();
+                            if (innerLogs == null) continue;
 
-                            foreach (var inner in InnerLogs)
+                            foreach (var inner in innerLogs)
                             {
-                                logFather = inner.GetFather(child);
+                                logFather = inner.GetFather(child, isLambdaLog);
                                 if (logFather != null) break;
                             }
 
@@ -175,21 +184,6 @@ namespace pryLogger.src
 
         public static LogEvent FromJson(string json) => JsonConvert.DeserializeObject<LogEvent>(json, Converter.Settings);
         public string ToJson(Formatting formatting = Formatting.None) => JsonConvert.SerializeObject(this, formatting, Converter.Settings);
-    }
-
-    internal static class LogExtensions
-    {
-        public static List<IEvent> GetEvents(this LogEvent log)
-        {
-            log.Events = log.Events ?? new List<IEvent>();
-            return log.Events;
-        }
-
-        public static List<LogEvent> GetInnerLogs(this LogEvent log)
-        {
-            log.Events = log.Events ?? new List<IEvent>();
-            return log.InnerLogs;
-        }
     }
 
     internal static class Converter

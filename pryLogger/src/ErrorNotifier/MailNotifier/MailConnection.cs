@@ -71,11 +71,7 @@ namespace pryLogger.src.ErrorNotifier.MailNotifier
                     }
 
                     var arrKeyValue = keyValue.Trim().Split('=');
-
-                    string key = arrKeyValue[0];
-                    string value = arrKeyValue[1];
-
-                    Values.Add(key, value);
+                    Values.Add(key: arrKeyValue[0], value: arrKeyValue[1]);
                 }
 
                 this.To = Values["to"];
