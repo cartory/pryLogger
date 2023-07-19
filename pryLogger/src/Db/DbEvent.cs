@@ -15,7 +15,7 @@ namespace pryLogger.src.Db
 
     public class DbEvent : IEvent
     {
-        [JsonProperty("starts")]
+        [JsonIgnore]
         public DateTimeOffset Starts { get; set; }
 
         [JsonProperty("elapsedTime")]
@@ -41,7 +41,7 @@ namespace pryLogger.src.Db
 
     public class DbQuery : IEvent
     {
-        [JsonProperty("starts")]
+        [JsonIgnore]
         public DateTimeOffset Starts { get; set; }
 
         [JsonProperty("elapsedTime")]

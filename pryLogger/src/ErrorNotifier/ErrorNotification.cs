@@ -22,6 +22,50 @@ namespace pryLogger.src.ErrorNotifier
                 return false;
             }
         }
+
+        public static string EncodeXml(this string xml) 
+        {
+            return xml?
+                .Replace("&", "&amp;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;")
+                .Replace("'", "&apos;")
+                .Replace(@"""", "&quot;");
+        }
+
+        public static void EncodeXml(this LogEvent log) 
+        {
+            if (log == null) return;
+
+            var innerLogs = log.InnerLogs;
+            string returns = log.Returns?.ToString();
+
+            if (returns?.IsXml() ?? false)
+            {
+                log.Returns = returns.EncodeXml();
+            }
+
+            if (log?.Params != null) 
+            {
+                foreach (var param in log.Params)
+                {
+                    string value = param.Value?.ToString();
+
+                    if (value?.IsXml() ?? false)
+                    {
+                        log.Params[param.Key] = value.EncodeXml();
+                    }
+                }
+            }
+
+            if (innerLogs != null) 
+            {
+                foreach (var inner in innerLogs)
+                {
+                    inner.EncodeXml();
+                }
+            }
+        }
     }
 
     public class ErrorNotification
@@ -33,8 +77,9 @@ namespace pryLogger.src.ErrorNotifier
         public string Repository { get; set; }
         public string[] IpAdresses { get; set; }
 
-        public static ErrorNotification FromLogEvent(LogEvent log, LogEvent errLog)
+        public static ErrorNotification FromLogEvent(LogEvent log, string errLocation)
         {
+            log.EncodeXml();
             var ipAddresses = Dns.GetHostAddresses(Dns.GetHostName())
                     .Select(ip => ip.ToString())
                     .Where(ip => Regex.IsMatch(ip, @"^\d+\.\d+\.\d+\.\d+$"));
@@ -43,7 +88,7 @@ namespace pryLogger.src.ErrorNotifier
             {
                 IpAdresses = ipAddresses.ToArray(),
                 JsonError = log.ToJson(Formatting.Indented),
-                Title = $"Error Detected At {errLog.Method}",
+                Title = $"Error Detected At {errLocation}",
                 ErrorMessage = $"At {Environment.CurrentDirectory}",
             };
         }
@@ -66,7 +111,7 @@ namespace pryLogger.src.ErrorNotifier
                 );
             }
 
-            if (IpAdresses != null && IpAdresses.Length > 0)
+            if (IpAdresses?.Length > 0)
             {
                 html += "<table><thead><tr><td><strong>Direccion Ip</strong></td></tr></thead><tbody>";
 
@@ -89,28 +134,6 @@ namespace pryLogger.src.ErrorNotifier
 
             if (!string.IsNullOrEmpty(JsonError))
             {
-                if (JsonError.Contains(@"returnValue"": """))
-                {
-                    int b = JsonError.LastIndexOf(@"""");
-                    int a = JsonError.LastIndexOf(@""": """);
-
-                    string returnValue = JsonError.Substring(a + 4, b - a - 4).Replace(@"\", "");
-
-                    if (returnValue.IsXml())
-                    {
-                        returnValue = returnValue.Replace("&", "&amp;")
-                            .Replace("<", "&lt;")
-                            .Replace(">", "&gt;")
-                            .Replace("'", "&apos;")
-                            .Replace(@"""", "&quot;")
-                            .Replace("iso - 8859 - 1", "iso-8859-1");
-
-                        JsonError = JsonError
-                                .Remove(a + 4, b - a - 4)
-                                .Insert(a + 4, returnValue);
-                    }
-                }
-
                 html += (
                     @"<small><pre>" +
                         $"<code>{JsonError}</code>" +

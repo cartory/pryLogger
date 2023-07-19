@@ -96,10 +96,7 @@ namespace pryLogger.src.Rest.RestXml
             return RestClient.Fetch(req, res =>
             {
                 var result = onResponse(res);
-                string xml = result?.ToXml(tagXml);
-
-                res.SetContent(xml);
-                return xml;
+                return result?.ToXml(tagXml);
             });
         }
     }
