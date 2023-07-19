@@ -29,11 +29,10 @@ namespace pryLogger.src.ErrorNotifier.MailNotifier
             DateTimeOffset now = DateTimeOffset.Now;
             TimeSpan diff = now - LastNotificationSent;
 
-            error.Repository = MailConnection.Repository;
-
             if (diff.TotalMinutes < MailConnection.IntervalMinutes) return;
-            
+
             LastNotificationSent = now;
+            error.Repository = MailConnection.Repository;
 
             using (var smtp = new SmtpClient(MailConnection.Host, MailConnection.Port))
             {
