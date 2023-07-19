@@ -13,11 +13,11 @@ namespace pryLogger.src.Rest
 
     public class RestEvent : IEvent
     {
-        [JsonIgnore]
-        public DateTimeOffset Starts { get; set; }
-
         [JsonProperty("elapsedTime")]
         public double ElapsedTime { get; set; }
+
+        [JsonIgnore]
+        public DateTimeOffset Starts { get; set; }
 
         [JsonProperty("request")]
         public RestRequest Request { get; set; }

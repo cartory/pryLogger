@@ -5,7 +5,7 @@ using pryLogger.src.ErrorNotifier;
 using LiteDB;
 using pryLogger.src.Log.Attributes;
 
-namespace pryLogger.src.Log.LogStrategies.LiteDb
+namespace pryLogger.src.Log.Strategies.LiteDb
 {
     public class LiteLog : LogAttribute
     {
@@ -41,7 +41,7 @@ namespace pryLogger.src.Log.LogStrategies.LiteDb
                 { 
                     ErrorNotifier?
                         .SetAttachMent(Settings.Connection.Filename)
-                        .Notify(ErrorNotification.FromLogEvent(log, errLog));
+                        .Notify(ErrorNotification.FromLogEvent(log, errLog.Method));
                 }
             }
             catch (Exception e)

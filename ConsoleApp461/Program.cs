@@ -1,16 +1,20 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
+
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using pryLogger.src.ErrorNotifier.MailNotifier;
+
 using Oracle.ManagedDataAccess.Client;
+using pryLogger.src.ErrorNotifier.MailNotifier;
 
 using pryLogger.src.Db;
-using pryLogger.src.Db.ConnectionManager;
-using pryLogger.src.Log.LogStrategies;
 using pryLogger.src.Rest;
-using pryLogger.src.Rest.RestXml;
+
+using pryLogger.src.Rest.Xml;
+using pryLogger.src.Log.Attributes;
+
+using pryLogger.src.Log.Strategies;
+using pryLogger.src.Db.ConnectionManager;
 
 namespace ConsoleApp461
 {
@@ -21,26 +25,29 @@ namespace ConsoleApp461
             Console.WriteLine($"catchException : {ex.Message}");
         }
 
-        [ConsoleLog]
-        static void level1() 
+        [ConsoleLog(nameof(onException))]
+        static void level1([LogRename("customParam")]string test = "lala land") 
         {
             level2();
-            var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("SELECT * FROM ganadero.USUARIOS u FETCH FIRST 10 ROWS ONLY");
+            throw new Exception();
+            //var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("SELECT * FROM ganadero.USUARIOS u FETCH FIRST 10 ROWS ONLY");
         }
 
         [ConsoleLog(nameof(onException))]
-        static void level2() 
+        static string level2() 
         {
             string url = "http://172.16.1.211:8080/topazinterpretedws/tokenbuilder";
             var Headers = new Dictionary<string, object>()
             {
-                { "Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"TOP1:SYSTEMS1s"))}"}
+                { "Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"TOP1:SYSTEMS1"))}"}
             };
 
-            var res = RestXmlAdapter.Fetch(new RestRequest(url) 
+            var res = RestClient.Fetch(new RestRequest(url) 
             {
                 Headers = Headers
-            });
+            }, rest => rest.Content?.ToXml());
+
+            return res;
         }
 
         static void Main(string[] args)

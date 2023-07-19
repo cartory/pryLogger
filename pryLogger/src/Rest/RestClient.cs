@@ -64,10 +64,13 @@ namespace pryLogger.src.Rest
 
             try
             {
-                var result = onResponse(res);
-                rest.Finish(req, res);
+                using (res.Response)
+                {
+                    var result = onResponse(res);
+                    rest.Finish(req, res);
 
-                return result;
+                    return result;
+                }
             }
             catch (Exception)
             {

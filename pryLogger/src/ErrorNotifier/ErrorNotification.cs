@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
+using pryLogger.src.Rest;
 
 namespace pryLogger.src.ErrorNotifier
 {
@@ -36,16 +37,15 @@ namespace pryLogger.src.ErrorNotifier
         public static void EncodeXml(this LogEvent log) 
         {
             if (log == null) return;
-
-            var innerLogs = log.InnerLogs;
-            string returns = log.Returns?.ToString();
+            
+            string returns = log?.Returns?.ToString();
 
             if (returns?.IsXml() ?? false)
             {
                 log.Returns = returns.EncodeXml();
             }
 
-            if (log?.Params != null) 
+            if (log.Params != null) 
             {
                 foreach (var param in log.Params)
                 {
@@ -58,13 +58,29 @@ namespace pryLogger.src.ErrorNotifier
                 }
             }
 
-            if (innerLogs != null) 
+            log.Events?.ForEach(e =>
             {
-                foreach (var inner in innerLogs)
+                if (e is LogEvent logEvent)
                 {
-                    inner.EncodeXml();
+                    logEvent.EncodeXml();
                 }
-            }
+
+                if (e is RestEvent restEvent)
+                {
+                    string reqContent = restEvent.Request?.Content;
+                    string resContent = restEvent.Response?.Content;
+
+                    if (reqContent?.IsXml() ?? false)
+                    {
+                        restEvent.Request.Content = reqContent.EncodeXml();
+                    }
+
+                    if (resContent?.IsXml() ?? false)
+                    {
+                        restEvent.Response.SetContent(resContent.EncodeXml());
+                    }
+                }
+            });
         }
     }
 

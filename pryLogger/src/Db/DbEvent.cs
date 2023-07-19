@@ -15,11 +15,11 @@ namespace pryLogger.src.Db
 
     public class DbEvent : IEvent
     {
-        [JsonIgnore]
-        public DateTimeOffset Starts { get; set; }
-
         [JsonProperty("elapsedTime")]
         public double ElapsedTime { get; set; }
+
+        [JsonIgnore]
+        public DateTimeOffset Starts { get; set; }
 
         [JsonProperty("queries", NullValueHandling = NullValueHandling.Ignore)]
         public List<DbQuery> Queries { get; set; }

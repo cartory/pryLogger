@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace pryLogger.src.Rest.RestXml
+namespace pryLogger.src.Rest.Xml
 {
-    public static class RestXmlAdapter
+    public static class XmlExtensions
     {
         public static bool IsJson(this string json)
         {
@@ -79,25 +79,6 @@ namespace pryLogger.src.Rest.RestXml
             }
 
             return xml;
-        }
-
-        public static string Fetch(RestRequest req) 
-        {
-            return RestXmlAdapter.Fetch(typeof(string).Name, req);
-        }
-
-        public static string Fetch(string tagXml, RestRequest req) 
-        {
-            return RestXmlAdapter.Fetch(tagXml, req, res => res.Content);
-        }
-
-        public static string Fetch<T>(string tagXml, RestRequest req, Func<RestResponse, T> onResponse) 
-        {
-            return RestClient.Fetch(req, res =>
-            {
-                var result = onResponse(res);
-                return result?.ToXml(tagXml);
-            });
         }
     }
 }
