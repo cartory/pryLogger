@@ -26,6 +26,7 @@ namespace pryLogger.src.Rest
         [JsonProperty("errMessage", NullValueHandling = NullValueHandling.Ignore)]
         public string ErrMessage { get; set; }
 
+        internal void SetContent(string content) => Content = content;
         internal void SetStatusCode(HttpStatusCode statusCode) => StatusCode = statusCode;
 
         private RestResponse(HttpWebResponse response)

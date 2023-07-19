@@ -11,8 +11,14 @@ namespace pryLogger.src.Rest
         public static void AddRestEvent(this LogEvent log, RestEvent rest) => log.GetEvents().Add(rest);
     }
 
-    public class RestEvent : Event
+    public class RestEvent : IEvent
     {
+        [JsonProperty("starts")]
+        public DateTimeOffset Starts { get; set; }
+
+        [JsonProperty("elapsedTime")]
+        public double ElapsedTime { get; set; }
+
         [JsonProperty("request")]
         public RestRequest Request { get; set; }
 
@@ -24,6 +30,14 @@ namespace pryLogger.src.Rest
             Request = req; 
             Response = res;
             Finish();
+        }
+
+        public void Start() => Starts = DateTimeOffset.Now;
+
+        public void Finish()
+        {
+            TimeSpan diff = DateTimeOffset.Now - Starts;
+            ElapsedTime = diff.TotalMilliseconds;
         }
     }
 }

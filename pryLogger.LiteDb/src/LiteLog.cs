@@ -5,7 +5,7 @@ using pryLogger.src.ErrorNotifier;
 using LiteDB;
 using pryLogger.src.Log.Attributes;
 
-namespace pryLogger.src.LogStrategies.LiteDb
+namespace pryLogger.src.Log.LogStrategies.LiteDb
 {
     public class LiteLog : LogAttribute
     {

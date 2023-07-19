@@ -16,11 +16,14 @@ namespace pryLogger.src.Rest
         [JsonIgnore]
         public HttpWebRequest Request { get; private set; }
 
-        [JsonProperty("headers", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, object> Headers { get; set; }
-
         [JsonProperty("method")]
         public string Method { get => Request.Method; set => Request.Method = value; }
+        
+        [JsonProperty("url")]
+        public string Url { get => Request.RequestUri.AbsoluteUri; }
+
+        [JsonProperty("headers", NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, object> Headers { get; set; }
 
         [JsonProperty("content", NullValueHandling = NullValueHandling.Ignore)]
         public string Content

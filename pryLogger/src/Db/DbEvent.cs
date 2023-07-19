@@ -13,8 +13,14 @@ namespace pryLogger.src.Db
         public static DbEvent GetLastDbEvent(this LogEvent log) => log.Events?.FindLast(e => e is DbEvent) as DbEvent;
     }
 
-    public class DbEvent : Event
+    public class DbEvent : IEvent
     {
+        [JsonProperty("starts")]
+        public DateTimeOffset Starts { get; set; }
+
+        [JsonProperty("elapsedTime")]
+        public double ElapsedTime { get; set; }
+
         [JsonProperty("queries", NullValueHandling = NullValueHandling.Ignore)]
         public List<DbQuery> Queries { get; set; }
 
@@ -23,10 +29,24 @@ namespace pryLogger.src.Db
             this.Queries = Queries ?? new List<DbQuery>();
             Queries.Add(query);
         }
+
+        public void Start() => Starts = DateTimeOffset.Now;
+
+        public void Finish()
+        {
+            TimeSpan diff = DateTimeOffset.Now - Starts;
+            ElapsedTime = diff.TotalMilliseconds;
+        }
     }
 
-    public class DbQuery : Event
+    public class DbQuery : IEvent
     {
+        [JsonProperty("starts")]
+        public DateTimeOffset Starts { get; set; }
+
+        [JsonProperty("elapsedTime")]
+        public double ElapsedTime { get; set; }
+
         [JsonProperty("sql")]
         public string Sql { get; set; }
 
@@ -41,6 +61,14 @@ namespace pryLogger.src.Db
             {
                 this.Params = @params;
             }
+        }
+
+        public void Start() => Starts = DateTimeOffset.Now;
+
+        public void Finish()
+        {
+            TimeSpan diff = DateTimeOffset.Now - Starts;
+            ElapsedTime = diff.TotalMilliseconds;
         }
     }
 }

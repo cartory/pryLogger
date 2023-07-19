@@ -3,13 +3,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using pryLogger.src.LogStrategies.File;
 using pryLogger.src.ErrorNotifier.MailNotifier;
 using Oracle.ManagedDataAccess.Client;
 
 using pryLogger.src.Db;
 using pryLogger.src.Db.ConnectionManager;
 using pryLogger.src.Log.LogStrategies;
+using pryLogger.src.Rest;
+using pryLogger.src.Rest.RestXml;
 
 namespace ConsoleApp461
 {
@@ -23,27 +24,23 @@ namespace ConsoleApp461
         [ConsoleLog]
         static void level1() 
         {
+            level2();
             var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("SELECT * FROM ganadero.USUARIOS u FETCH FIRST 10 ROWS ONLY");
-            Console.WriteLine("level1a");
-            //level2();
         }
 
-        [FileLog(nameof(onException))]
+        [ConsoleLog(nameof(onException))]
         static void level2() 
         {
-            Console.WriteLine("level2");
-            throw new Exception("test exception");
-            //FileLog.New.OnAdvice("level2b", log =>
-            //{
-            //    try
-            //    {
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        log.SetException(e);
-            //        Console.WriteLine("level2b");
-            //    }
-            //});
+            string url = "http://172.16.1.211:8080/topazinterpretedws/tokenbuilder";
+            var Headers = new Dictionary<string, object>()
+            {
+                { "Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"TOP1:SYSTEMS1s"))}"}
+            };
+
+            var res = RestXmlAdapter.Fetch(new RestRequest(url) 
+            {
+                Headers = Headers
+            });
         }
 
         static void Main(string[] args)

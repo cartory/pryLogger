@@ -17,16 +17,16 @@ namespace pryLogger.src.Rest
             return Fetch(req, rest => rest);
         }
 
-        public static void Fetch(RestRequest req, Action<RestResponse> callback)
+        public static void Fetch(RestRequest req, Action<RestResponse> onResponse)
         {
             Fetch(req, res =>
             {
-                callback(res);
+                onResponse(res);
                 return 0;
             });
         }
 
-        public static T Fetch<T>(RestRequest req, Func<RestResponse, T> callback) 
+        public static T Fetch<T>(RestRequest req, Func<RestResponse, T> onResponse) 
         {
             RestEvent rest = new RestEvent();
             RestResponse res = new RestResponse();
@@ -64,8 +64,9 @@ namespace pryLogger.src.Rest
 
             try
             {
-                var result = callback(res);
+                var result = onResponse(res);
                 rest.Finish(req, res);
+
                 return result;
             }
             catch (Exception)

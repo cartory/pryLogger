@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
-using System.Text;
+using System.Xml.Linq;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ namespace pryLogger.src.Rest.RestXml
 {
     public static class RestXmlAdapter
     {
-        public static bool IsJson(this string json) 
+        public static bool IsJson(this string json)
         {
             try
             {
@@ -24,11 +24,11 @@ namespace pryLogger.src.Rest.RestXml
             }
         }
 
-        public static bool IsXml(this string xml) 
+        public static bool IsXml(this string xml)
         {
             try
             {
-                JObject.Parse(xml);
+                XDocument.Parse(xml);
                 return true;
             }
             catch (Exception)
@@ -43,7 +43,7 @@ namespace pryLogger.src.Rest.RestXml
             return arg?.ToXml(type.Name);
         }
 
-        public static string ToXml(this object arg, string tagXml) 
+        public static string ToXml(this object arg, string tagXml)
         {
             Type type = arg?.GetType() ?? typeof(Nullable);
             string strValue = arg?.ToString() ?? JsonConvert.SerializeObject(arg);
@@ -81,17 +81,25 @@ namespace pryLogger.src.Rest.RestXml
             return xml;
         }
 
+        public static string Fetch(RestRequest req) 
+        {
+            return RestXmlAdapter.Fetch(typeof(string).Name, req);
+        }
+
         public static string Fetch(string tagXml, RestRequest req) 
         {
             return RestXmlAdapter.Fetch(tagXml, req, res => res.Content);
         }
 
-        public static string Fetch<T>(string tagXml, RestRequest req, Func<RestResponse, T> callback) 
+        public static string Fetch<T>(string tagXml, RestRequest req, Func<RestResponse, T> onResponse) 
         {
             return RestClient.Fetch(req, res =>
             {
-                var result = callback(res);
-                return result.ToXml(tagXml);
+                var result = onResponse(res);
+                string xml = result?.ToXml(tagXml);
+
+                res.SetContent(xml);
+                return xml;
             });
         }
     }

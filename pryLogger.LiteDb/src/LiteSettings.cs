@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 using LiteDB;
 
-namespace pryLogger.src.LogStrategies.LiteDb
+namespace pryLogger.src.Log.LogStrategies.LiteDb
 {
     public class LiteSettings
     {
