@@ -36,7 +36,7 @@ namespace ConsoleApp461
         static void level1([LogRename("customParam")]string test = "lala land") 
         {
             level2();
-            //var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("SELECT * FROM ganadero.USUARIOS u FETCH FIRST 10 ROWS ONLY");
+            //var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("select query. ...");
             throw new Exception();
         }
 
