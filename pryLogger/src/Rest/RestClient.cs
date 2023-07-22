@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+
+using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -30,6 +32,7 @@ namespace pryLogger.src.Rest
         {
             RestEvent rest = new RestEvent();
             RestResponse res = new RestResponse();
+            var bytes = Encoding.UTF8.GetBytes(req.Content);
 
             LogAttribute.CurrentLog?.AddRestEvent(rest);
 
@@ -43,6 +46,14 @@ namespace pryLogger.src.Rest
 
             try
             {
+                req.Request.ContentLength = bytes.Length;
+                req.Request.ContentType = req.ContentType;
+
+                using (var reqStream = req.Request.GetRequestStream())
+                {
+                    reqStream.Write(bytes, 0, bytes.Length);
+                }
+
                 rest.Start();
                 res = (HttpWebResponse)req.Request.GetResponse();
             }

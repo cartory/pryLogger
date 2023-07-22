@@ -24,16 +24,6 @@ namespace pryLogger.src.ErrorNotifier
             }
         }
 
-        public static string EncodeXml(this string xml) 
-        {
-            return xml?
-                .Replace("&", "&amp;")
-                .Replace("<", "&lt;")
-                .Replace(">", "&gt;")
-                .Replace("'", "&apos;")
-                .Replace(@"""", "&quot;");
-        }
-
         public static void EncodeXml(this LogEvent log) 
         {
             if (log == null) return;
@@ -42,7 +32,7 @@ namespace pryLogger.src.ErrorNotifier
 
             if (returns?.IsXml() ?? false)
             {
-                log.Returns = returns.EncodeXml();
+                log.Returns = WebUtility.HtmlEncode(returns);
             }
 
             if (log.Params != null) 
@@ -53,7 +43,7 @@ namespace pryLogger.src.ErrorNotifier
 
                     if (value?.IsXml() ?? false)
                     {
-                        log.Params[param.Key] = value.EncodeXml();
+                        log.Params[param.Key] = WebUtility.HtmlEncode(value);
                     }
                 }
             }
@@ -72,12 +62,12 @@ namespace pryLogger.src.ErrorNotifier
 
                     if (reqContent?.IsXml() ?? false)
                     {
-                        restEvent.Request.Content = reqContent.EncodeXml();
+                        restEvent.Request.Content = WebUtility.HtmlEncode(reqContent);
                     }
 
                     if (resContent?.IsXml() ?? false)
                     {
-                        restEvent.Response.SetContent(resContent.EncodeXml());
+                        restEvent.Response.SetContent(WebUtility.HtmlEncode(resContent));
                     }
                 }
             });

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
+
 using System.Xml.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -37,16 +39,33 @@ namespace pryLogger.src.Rest.Xml
             }
         }
 
-        public static string ToXml(this object arg)
+        public static bool IsXml(this string xml, out XDocument doc)
         {
-            Type type = arg?.GetType() ?? typeof(Nullable);
-            return arg?.ToXml(type.Name);
+
+            try
+            {
+                doc = XDocument.Parse(xml);
+            }
+            catch (Exception)
+            {
+                doc = null;
+            }
+
+            return doc != null;
         }
 
-        public static string ToXml(this object arg, string tagXml)
+        public static string ToXml(this object arg) => arg?.ToXml(declaration: null);
+        public static string ToXml(this object arg, XDeclaration declaration)
         {
             Type type = arg?.GetType() ?? typeof(Nullable);
-            string strValue = arg?.ToString() ?? JsonConvert.SerializeObject(arg);
+            return arg?.ToXml(type.Name, declaration);
+        }
+
+        public static string ToXml(this object arg, string tagXml) => arg?.ToXml(tagXml, null);
+        public static string ToXml(this object arg, string tagXml, XDeclaration declaration)
+        {
+            Type type = arg?.GetType() ?? typeof(Nullable);
+            string strValue = arg is string ? arg.ToString() : JsonConvert.SerializeObject(arg);
 
             if (strValue.IsXml())
             {
@@ -61,11 +80,14 @@ namespace pryLogger.src.Rest.Xml
                 });
             }
 
-            XmlDocument xmlDocument = JsonConvert.DeserializeXmlNode(strValue, tagXml);
-            XmlDeclaration xmlDeclaration = xmlDocument.CreateXmlDeclaration("1.0", "iso-8859-1", string.Empty);
-
             string xml;
-            xmlDocument.InsertBefore(xmlDeclaration, xmlDocument.DocumentElement);
+            XmlDocument xmlDocument = JsonConvert.DeserializeXmlNode(strValue, tagXml);
+
+            if (declaration != null)
+            {
+                XmlDeclaration xmlDeclaration = xmlDocument.CreateXmlDeclaration(declaration.Version, declaration.Encoding, declaration.Standalone);
+                xmlDocument.InsertBefore(xmlDeclaration, xmlDocument.DocumentElement);
+            }
 
             using (StringWriter stringWriter = new StringWriter())
             {
@@ -78,7 +100,7 @@ namespace pryLogger.src.Rest.Xml
                 }
             }
 
-            return xml;
+            return declaration != null ? xml : Regex.Replace(xml, @"^<\?xml.*\?>", string.Empty);
         }
     }
 }

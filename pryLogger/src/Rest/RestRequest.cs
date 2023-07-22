@@ -10,7 +10,6 @@ namespace pryLogger.src.Rest
 {
     public class RestRequest
     {
-        private string stringContent;
         public static implicit operator RestRequest(HttpWebRequest request) => new RestRequest(request);
 
         [JsonIgnore]
@@ -19,6 +18,9 @@ namespace pryLogger.src.Rest
         [JsonProperty("method")]
         public string Method { get => Request.Method; set => Request.Method = value; }
         
+        [JsonProperty("contentType", NullValueHandling = NullValueHandling.Ignore)]
+        public string ContentType { get; set; }
+
         [JsonProperty("url")]
         public string Url { get => Request.RequestUri.AbsoluteUri; }
 
@@ -26,21 +28,7 @@ namespace pryLogger.src.Rest
         public Dictionary<string, object> Headers { get; set; }
 
         [JsonProperty("content", NullValueHandling = NullValueHandling.Ignore)]
-        public string Content
-        {
-            get => stringContent;
-            set
-            {
-                stringContent = value;
-                var bytes = Encoding.UTF8.GetBytes(stringContent);
-
-                using (var reqStream = Request.GetRequestStream())
-                {
-                    Request.ContentLength = bytes.Length;
-                    reqStream.Write(bytes, 0, bytes.Length);
-                }
-            }
-        }
+        public string Content { get; set; }
 
         private RestRequest(HttpWebRequest request) => Request = request;
         public RestRequest(string url) => Request = WebRequest.CreateHttp(url);
