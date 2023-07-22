@@ -23,5 +23,11 @@
     </releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>Logs LogsAttributes FileLog ConsoleLog Events RestEventLogs RestXmlExtensions DbEventLogs DbConnectionManager</tags>
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="MrAdvice" version="2.9.9" />
+        <dependency id="Newtonsoft.Json" version="13.0.3" />
+      </group>
+    </dependencies>
   </metadata>
 </package>
