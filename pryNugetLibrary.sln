@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pryLogger", "pryLogger\pryL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp461", "ConsoleApp461\ConsoleApp461.csproj", "{DD6F31D6-0BED-466C-8DCE-8A5D290E06D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pryLogger.LiteDb", "pryLogger.LiteDb\pryLogger.LiteDb.csproj", "{0A66EFD8-16EC-48F3-8D8A-0BC4EB56A6F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pryLogger40", "pryLogger40\pryLogger40.csproj", "{40CD5757-354D-4B67-9913-69F01B87FCC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{DD6F31D6-0BED-466C-8DCE-8A5D290E06D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD6F31D6-0BED-466C-8DCE-8A5D290E06D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD6F31D6-0BED-466C-8DCE-8A5D290E06D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A66EFD8-16EC-48F3-8D8A-0BC4EB56A6F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A66EFD8-16EC-48F3-8D8A-0BC4EB56A6F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A66EFD8-16EC-48F3-8D8A-0BC4EB56A6F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A66EFD8-16EC-48F3-8D8A-0BC4EB56A6F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40CD5757-354D-4B67-9913-69F01B87FCC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40CD5757-354D-4B67-9913-69F01B87FCC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40CD5757-354D-4B67-9913-69F01B87FCC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40CD5757-354D-4B67-9913-69F01B87FCC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
