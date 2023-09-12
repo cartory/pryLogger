@@ -1,34 +1,50 @@
 ﻿using System;
 using System.Data;
-
 using System.Linq;
-using System.Data.Common;
 
+using System.Data.Common;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
 namespace pryLogger.src.Db.ConnectionManager
 {
-    public class ConnectionManager 
+    /// <summary>
+    /// Generic connection manager that manages a pool of database connections.
+    /// </summary>
+    /// <typeparam name="Connection">Type of connection to be managed, must be derived from DbConnection.</typeparam>
+    /// <typeparam name="ConnectionStringBuilder">Type of connection string builder to be used, must be derived from DbConnectionStringBuilder.</typeparam>
+    public class ConnectionManager<Connection, ConnectionStringBuilder>
+        where Connection : DbConnection, new()
+        where ConnectionStringBuilder : DbConnectionStringBuilder, new()
     {
+        /// <summary>
+        /// Singleton instance of the connection manager.
+        /// </summary>
+        public static ConnectionManager<Connection, ConnectionStringBuilder> Instance = new ConnectionManager<Connection, ConnectionStringBuilder>();
+
         protected readonly Queue<Guid> Tickets = new Queue<Guid>();
-        protected readonly ObservableList<DbConnection> Connections = new ObservableList<DbConnection>();
+        protected readonly ObservableList<Connection> Connections = new ObservableList<Connection>();
 
-        public readonly static ConnectionManager Instance = new ConnectionManager();
+        /// <summary>
+        /// Gets or sets the connection string builder used by the connection manager.
+        /// </summary>
+        public ConnectionStringBuilder ConnectionString { get; protected set; }
 
-        public DbConnectionStringBuilder ConnectionStringBuilder { get; protected set; }
+        /// <summary>
+        /// Gets the maximum size of the connection pool.
+        /// </summary>
         protected int MaxPoolSize
         {
-            get 
+            get
             {
                 string[] keys = new string[] { "MaxPoolSize", "MaximumPoolSize" };
-                var properties = ConnectionStringBuilder?.GetType().GetProperties();
+                var properties = ConnectionString?.GetType().GetProperties();
 
                 foreach (var property in properties)
                 {
-                    if (keys.Contains(property.Name)) 
+                    if (keys.Contains(property.Name))
                     {
-                        int maxPoolSize = (int)property.GetValue(ConnectionStringBuilder);
+                        int maxPoolSize = (int)property.GetValue(ConnectionString);
                         return maxPoolSize;
                     }
                 }
@@ -37,23 +53,39 @@ namespace pryLogger.src.Db.ConnectionManager
             }
         }
 
-        public ConnectionManager() { }
-        public ConnectionManager(DbConnectionStringBuilder connectionStringBuilder)
+        private ConnectionManager() { }
+
+        /// <summary>
+        /// Initializes a new instance of the connection manager with a connection string builder.
+        /// </summary>
+        /// <param name="connectionStringBuilder">The connection string builder to be used.</param>
+        public ConnectionManager(ConnectionStringBuilder connectionStringBuilder)
         {
-            this.ConnectionStringBuilder = connectionStringBuilder;
+            this.ConnectionString = connectionStringBuilder;
         }
 
-        public void SetConnectionString(DbConnectionStringBuilder connectionStringBuilder)
+        /// <summary>
+        /// Initializes a new instance of the connection manager with a connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string used to create the connection string builder.</param>
+        public ConnectionManager(string connectionString)
         {
-            this.ConnectionStringBuilder = connectionStringBuilder;
+            this.ConnectionString = (ConnectionStringBuilder)Activator.CreateInstance(typeof(ConnectionStringBuilder), new object[] { connectionString });
         }
 
-        public void SetConnectionString<ConnStringBuilder>(string connectionString) where ConnStringBuilder : DbConnectionStringBuilder
+        /// <summary>
+        /// Sets a new connection string for the connection manager.
+        /// </summary>
+        /// <param name="connectionString">The new connection string.</param>
+        public virtual void SetConnectionString(string connectionString)
         {
-            this.ConnectionStringBuilder = Activator.CreateInstance(typeof(ConnStringBuilder), connectionString) as ConnStringBuilder;
+            this.ConnectionString = (ConnectionStringBuilder)Activator.CreateInstance(typeof(ConnectionStringBuilder), new object[] { connectionString });
         }
 
-        public void Clear()
+        /// <summary>
+        /// Clears all connections and tickets from the connection pool.
+        /// </summary>
+        public virtual void Clear()
         {
             Tickets.Clear();
             Connections.RemoveAll(conn =>
@@ -63,7 +95,12 @@ namespace pryLogger.src.Db.ConnectionManager
             });
         }
 
-        protected void NotifyFreeConnection(DbConnection conn, int index)
+        /// <summary>
+        /// Notifies when a connection's state changes to closed and frees it.
+        /// </summary>
+        /// <param name="conn">The connection to be freed.</param>
+        /// <param name="index">The index of the connection in the pool.</param>
+        protected virtual void NotifyFreeConnection(DbConnection conn, int index)
         {
             conn.Dispose();
             Connections.RemoveAt(index);
@@ -77,9 +114,14 @@ namespace pryLogger.src.Db.ConnectionManager
             }
         }
 
-        protected Conn GetFreeConnection<Conn>(int index) where Conn : DbConnection
+        /// <summary>
+        /// Gets a free connection from the pool.
+        /// </summary>
+        /// <param name="index">The index of the connection in the pool.</param>
+        /// <returns>The obtained free connection.</returns>
+        protected virtual Connection GetFreeConnection(int index)
         {
-            Conn conn = Activator.CreateInstance(typeof(Conn), ConnectionStringBuilder.ConnectionString) as Conn;
+            Connection conn = Activator.CreateInstance(typeof(Connection), this.ConnectionString.ConnectionString) as Connection;
 
             conn.StateChange += (sender, e) =>
             {
@@ -92,11 +134,15 @@ namespace pryLogger.src.Db.ConnectionManager
             return conn;
         }
 
-        public Conn GetConnection<Conn>() where Conn : DbConnection
+        /// <summary>
+        /// Gets a connection from the connection pool synchronously.
+        /// </summary>
+        /// <returns>The obtained connection.</returns>
+        public virtual Connection GetConnection()
         {
             lock (this)
             {
-                var taskConn = this.GetConnectionAsync<Conn>();
+                var taskConn = this.GetConnectionAsync();
 
                 try
                 {
@@ -111,23 +157,27 @@ namespace pryLogger.src.Db.ConnectionManager
             }
         }
 
-        public Task<Conn> GetConnectionAsync<Conn>() where Conn : DbConnection
+        /// <summary>
+        /// Gets a connection from the connection pool asynchronously.
+        /// </summary>
+        /// <returns>A task representing the obtained connection.</returns>
+        public virtual Task<Connection> GetConnectionAsync()
         {
-            Conn conn;
             int index = -1;
-            var promise = new TaskCompletionSource<Conn>();
+            Connection conn;
+            var promise = new TaskCompletionSource<Connection>();
 
             try
             {
                 if (Connections.Count < MaxPoolSize)
                 {
                     index = Connections.Count;
-                    conn = GetFreeConnection<Conn>(index);
+                    conn = GetFreeConnection(index);
 
                     Connections.Add(conn);
                     promise.SetResult(conn);
                 }
-                else 
+                else
                 {
                     var ticket = Guid.NewGuid();
                     Tickets.Enqueue(ticket);
@@ -135,7 +185,7 @@ namespace pryLogger.src.Db.ConnectionManager
                     Connections.AddListener(ticket, () =>
                     {
                         index = Connections.Count;
-                        conn = GetFreeConnection<Conn>(index);
+                        conn = GetFreeConnection(index);
 
                         Connections.Add(conn);
                         promise.SetResult(conn);
@@ -144,9 +194,9 @@ namespace pryLogger.src.Db.ConnectionManager
             }
             catch (Exception e)
             {
-                if (index > -1 && index < Connections.Count) 
+                if (index > -1 && index < Connections.Count)
                 {
-                    conn = Connections[index] as Conn;
+                    conn = Connections[index];
                     NotifyFreeConnection(conn, index);
                 }
 

@@ -1,24 +1,35 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
-
 using pryLogger.src.Log.Attributes;
 
 namespace pryLogger.src.Rest
 {
+    /// <summary>
+    /// Represents a REST client for making HTTP requests.
+    /// </summary>
     public class RestClient
     {
         private static readonly Regex regex = new Regex(@"\((\d{3})\)");
 
+        /// <summary>
+        /// Sends a REST request and returns the response.
+        /// </summary>
+        /// <param name="req">The REST request to send.</param>
+        /// <returns>The REST response received from the server.</returns>
         public static RestResponse Fetch(RestRequest req)
         {
             return Fetch(req, rest => rest);
         }
 
+        /// <summary>
+        /// Sends a REST request and performs an action when the response is received.
+        /// </summary>
+        /// <param name="req">The REST request to send.</param>
+        /// <param name="onResponse">The action to perform when the response is received.</param>
         public static void Fetch(RestRequest req, Action<RestResponse> onResponse)
         {
             Fetch(req, res =>
@@ -28,7 +39,14 @@ namespace pryLogger.src.Rest
             });
         }
 
-        public static T Fetch<T>(RestRequest req, Func<RestResponse, T> onResponse) 
+        /// <summary>
+        /// Sends a REST request and processes the response with a specified function.
+        /// </summary>
+        /// <typeparam name="T">The type of result to return.</typeparam>
+        /// <param name="req">The REST request to send.</param>
+        /// <param name="onResponse">The function to process the response and return a result.</param>
+        /// <returns>The result of processing the REST response.</returns>
+        public static T Fetch<T>(RestRequest req, Func<RestResponse, T> onResponse)
         {
             RestEvent rest = new RestEvent();
             RestResponse res = new RestResponse();

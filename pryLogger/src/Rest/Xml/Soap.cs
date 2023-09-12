@@ -1,28 +1,54 @@
 ﻿using System;
 using System.Linq;
-
 using System.Xml.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace pryLogger.src.Rest.Xml
 {
-    public static class Declarations 
+    /// <summary>
+    /// Provides XML declarations commonly used in SOAP requests and responses.
+    /// </summary>
+    public static class Declarations
     {
+        /// <summary>
+        /// Represents the UTF-8 XML declaration.
+        /// </summary>
         public static readonly XDeclaration UTF8 = new XDeclaration("1.0", "utf-8", "yes");
+
+        /// <summary>
+        /// Represents the ISO-8859-1 XML declaration.
+        /// </summary>
         public static readonly XDeclaration ISO_8859_1 = new XDeclaration("1.0", "iso-8859-1", "yes");
     }
 
+    /// <summary>
+    /// Provides utility methods for creating and parsing SOAP XML messages.
+    /// </summary>
     public static class Soap
     {
+        /// <summary>
+        /// Creates a SOAP XML request message with a specified header and body.
+        /// </summary>
+        /// <param name="name">The name of the XML request.</param>
+        /// <param name="header">The XML header object.</param>
+        /// <param name="body">The XML body object.</param>
+        /// <returns>A string representing the SOAP XML request message.</returns>
         public static string CreateXmlRequest(XName name, object header, object body)
         {
             return CreateXmlRequest(name, header, body, null);
         }
 
+        /// <summary>
+        /// Creates a SOAP XML request message with a specified header, body, and XML declaration.
+        /// </summary>
+        /// <param name="name">The name of the XML request.</param>
+        /// <param name="header">The XML header object.</param>
+        /// <param name="body">The XML body object.</param>
+        /// <param name="declaration">The XML declaration for the request.</param>
+        /// <returns>A string representing the SOAP XML request message.</returns>
         public static string CreateXmlRequest(XName name, object header, object body, XDeclaration declaration)
         {
             string request = header?.ToXml("soap:Header") ?? "<soap:Header/>";
@@ -41,6 +67,12 @@ namespace pryLogger.src.Rest.Xml
             return $"{declaration}{request}";
         }
 
+        /// <summary>
+        /// Parses a SOAP XML response and extracts the content with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the XML element to extract.</param>
+        /// <param name="content">The SOAP XML response content.</param>
+        /// <returns>The extracted content as an object.</returns>
         public static object FromXmlResponse(XName name, string content)
         {
             XElement bodyElement = XElement.Parse(content);

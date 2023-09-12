@@ -22,9 +22,10 @@
       - Included extensions for XML handling within a REST API.
     </releaseNotes>
     <copyright>$copyright$</copyright>
-    <tags>Logs LogsAttributes FileLog ConsoleLog Events RestEventLogs RestXmlExtensions DbEventLogs DbConnectionManager</tags>
+    <tags>Logs LogsAttributes LiteDbLog FileLog ConsoleLog Events RestEventLogs RestXmlExtensions DbEventLogs DbConnectionManager</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
+        <dependency id="LiteDB" version="5.0.16" />
         <dependency id="MrAdvice" version="2.9.9" />
         <dependency id="Newtonsoft.Json" version="13.0.3" />
       </group>

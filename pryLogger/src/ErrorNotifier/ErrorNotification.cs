@@ -9,9 +9,14 @@ using pryLogger.src.Rest;
 
 namespace pryLogger.src.ErrorNotifier
 {
-    internal static class StringExtensions 
+    internal static class StringExtensions
     {
-        public static bool IsXml(this string xml) 
+        /// <summary>
+        /// Determines whether a string is a valid XML document.
+        /// </summary>
+        /// <param name="xml">The input string to check.</param>
+        /// <returns>True if the string is a valid XML document; otherwise, false.</returns>
+        public static bool IsXml(this string xml)
         {
             try
             {
@@ -24,10 +29,14 @@ namespace pryLogger.src.ErrorNotifier
             }
         }
 
-        public static void EncodeXml(this LogEvent log) 
+        /// <summary>
+        /// Encodes XML content in a log event to prevent XML-related issues.
+        /// </summary>
+        /// <param name="log">The log event to encode.</param>
+        public static void EncodeXml(this LogEvent log)
         {
             if (log == null) return;
-            
+
             string returns = log?.Returns?.ToString();
 
             if (returns?.IsXml() ?? false)
@@ -35,7 +44,7 @@ namespace pryLogger.src.ErrorNotifier
                 log.Returns = WebUtility.HtmlEncode(returns);
             }
 
-            if (log.Params != null) 
+            if (log.Params != null)
             {
                 foreach (var param in log.Params)
                 {
@@ -74,15 +83,42 @@ namespace pryLogger.src.ErrorNotifier
         }
     }
 
+    /// <summary>
+    /// Represents an error notification.
+    /// </summary>
     public class ErrorNotification
     {
+        /// <summary>
+        /// Gets or sets the title of the error notification.
+        /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the JSON representation of the error.
+        /// </summary>
         public string JsonError { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message.
+        /// </summary>
         public string ErrorMessage { get; set; }
 
+        /// <summary>
+        /// Gets or sets the repository related to the error.
+        /// </summary>
         public string Repository { get; set; }
+
+        /// <summary>
+        /// Gets or sets an array of IP addresses.
+        /// </summary>
         public string[] IpAdresses { get; set; }
 
+        /// <summary>
+        /// Creates an ErrorNotification from a LogEvent and error location.
+        /// </summary>
+        /// <param name="log">The LogEvent containing the error information.</param>
+        /// <param name="errLocation">The location where the error occurred.</param>
+        /// <returns>An ErrorNotification instance.</returns>
         public static ErrorNotification FromLogEvent(LogEvent log, string errLocation)
         {
             log.EncodeXml();
@@ -99,6 +135,10 @@ namespace pryLogger.src.ErrorNotifier
             };
         }
 
+        /// <summary>
+        /// Converts the error notification to an HTML representation.
+        /// </summary>
+        /// <returns>An HTML representation of the error notification.</returns>
         public string ToHtml()
         {
             string html = string.Empty;

@@ -5,12 +5,21 @@ using System.Linq;
 using System.Data.Common;
 using System.Collections.Generic;
 
+using Newtonsoft.Json.Linq;
 using pryLogger.src.Log.Attributes;
 
 namespace pryLogger.src.Db
 {
+    /// <summary>
+    /// A static class containing database-related extension methods.
+    /// </summary>
     public static partial class DbExtensions
     {
+        /// <summary>
+        /// Executes a database query with a specified action on the database connection.
+        /// </summary>
+        /// <param name="conn">The database connection.</param>
+        /// <param name="action">The action to execute on the database command.</param>
         public static void Query(this DbConnection conn, Action<DbCommand> action)
         {
             conn.Query(command =>
@@ -20,7 +29,14 @@ namespace pryLogger.src.Db
             });
         }
 
-        public static T Query<T>(this DbConnection conn, Func<DbCommand, T> func) 
+        /// <summary>
+        /// Executes a database query with a specified function on the database connection and returns a result.
+        /// </summary>
+        /// <typeparam name="T">The type of result to return.</typeparam>
+        /// <param name="conn">The database connection.</param>
+        /// <param name="func">The function to execute on the database command.</param>
+        /// <returns>The result of the database query.</returns>
+        public static T Query<T>(this DbConnection conn, Func<DbCommand, T> func)
         {
             var dbEvent = new DbEvent();
 
@@ -53,6 +69,12 @@ namespace pryLogger.src.Db
             }
         }
 
+        /// <summary>
+        /// Executes a SELECT query on the database and returns the result as a DataTable.
+        /// </summary>
+        /// <param name="command">The database command to execute.</param>
+        /// <param name="sql">The SQL query to execute.</param>
+        /// <returns>The result of the query as a DataTable.</returns>
         public static DataTable SelectQuery(this DbCommand command, string sql)
         {
             command.CommandText = sql;
@@ -67,6 +89,12 @@ namespace pryLogger.src.Db
             return dataTable;
         }
 
+        /// <summary>
+        /// Executes multiple SELECT SQL queries and returns the results as an array of DataTables.
+        /// </summary>
+        /// <param name="command">The database command to execute.</param>
+        /// <param name="sqls">An array of SQL queries to execute.</param>
+        /// <returns>An array of DataTables containing the results of the queries.</returns>
         public static DataTable[] SelectQueries(this DbCommand command, params string[] sqls)
         {
             DataTable[] dataTables = new DataTable[sqls.Length];
@@ -79,25 +107,39 @@ namespace pryLogger.src.Db
             return dataTables;
         }
 
+        /// <summary>
+        /// Executes a SELECT query on the database and returns the result as a DataTable.
+        /// </summary>
+        /// <param name="conn">The database connection to use.</param>
+        /// <param name="sql">The SQL query to execute.</param>
+        /// <returns>The result of the query as a DataTable.</returns>
         public static DataTable SelectQuery(this DbConnection conn, string sql)
         {
             return conn.SelectQueries(sql).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Executes multiple SELECT SQL queries and returns the results as an array of DataTables.
+        /// </summary>
+        /// <param name="conn">The database connection to use.</param>
+        /// <param name="sqls">An array of SQL queries to execute.</param>
+        /// <returns>An array of DataTables containing the results of the queries.</returns>
         public static DataTable[] SelectQueries(this DbConnection conn, params string[] sqls)
         {
             return conn.Query(command => command.SelectQueries(sqls));
         }
-    }
 
-    public static partial class DbExtensions
-    {
+        /// <summary>
+        /// Converts a collection of DbParameter objects into a dictionary of name-value pairs.
+        /// </summary>
+        /// <param name="params">The collection of DbParameter objects.</param>
+        /// <returns>A dictionary of name-value pairs representing the parameters.</returns>
         public static Dictionary<string, object> ToDictionary(this DbParameterCollection @params)
         {
             var keys = new Dictionary<string, object>();
 
-            if (@params != null) 
-            { 
+            if (@params != null)
+            {
                 foreach (DbParameter param in @params)
                 {
                     keys.Add(param.ParameterName, param.Value);
@@ -107,9 +149,13 @@ namespace pryLogger.src.Db
             return keys;
         }
 
+        /// <summary>
+        /// Executes a database command and logs the query in the event log.
+        /// </summary>
+        /// <param name="command">The database command to execute.</param>
+        /// <returns>The number of rows affected by the query.</returns>
         public static int LogExecuteNonQuery(this DbCommand command)
         {
-
             var query = new DbQuery(command.CommandText, command.Parameters?.ToDictionary());
             LogAttribute.CurrentLog?.GetLastDbEvent()?.AddQuery(query);
 
@@ -120,6 +166,11 @@ namespace pryLogger.src.Db
             return affectedRows;
         }
 
+        /// <summary>
+        /// Executes a database command and logs the query in the event log, returning a scalar value.
+        /// </summary>
+        /// <param name="command">The database command to execute.</param>
+        /// <returns>The scalar value returned by the query.</returns>
         public static object LogExecuteScalar(this DbCommand command)
         {
             var query = new DbQuery(command.CommandText, command.Parameters?.ToDictionary());
@@ -132,6 +183,11 @@ namespace pryLogger.src.Db
             return result;
         }
 
+        /// <summary>
+        /// Executes a database command and logs the query in the event log, returning a DbDataReader.
+        /// </summary>
+        /// <param name="command">The database command to execute.</param>
+        /// <returns>A DbDataReader containing the query results.</returns>
         public static DbDataReader LogExecuteReader(this DbCommand command)
         {
             var query = new DbQuery(command.CommandText, command.Parameters?.ToDictionary());
@@ -144,6 +200,12 @@ namespace pryLogger.src.Db
             return result;
         }
 
+        /// <summary>
+        /// Executes a database command and logs the query in the event log with the specified behavior, returning a DbDataReader.
+        /// </summary>
+        /// <param name="command">The database command to execute.</param>
+        /// <param name="behavior">The CommandBehavior to use when executing the query.</param>
+        /// <returns>A DbDataReader containing the query results.</returns>
         public static DbDataReader LogExecuteReader(this DbCommand command, CommandBehavior behavior)
         {
             var query = new DbQuery(command.CommandText, command.Parameters?.ToDictionary());
@@ -155,10 +217,26 @@ namespace pryLogger.src.Db
 
             return result;
         }
-    }
 
-    public static partial class DbExtensions
-    {
+        /// <summary>
+        /// Converts a DataTable into an array of objects of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type of objects to create.</typeparam>
+        /// <param name="datatable">The DataTable to convert.</param>
+        /// <returns>An array of objects of type T.</returns>
+        public static T[] ToObject<T>(this DataTable datatable) where T : new()
+        {
+            return datatable
+                .ToDictionary()
+                .Select(x => JObject.FromObject(x).ToObject<T>())
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Converts a DataTable into an array of dictionaries containing column name-value pairs.
+        /// </summary>
+        /// <param name="dataTable">The DataTable to convert.</param>
+        /// <returns>An array of dictionaries representing the rows of the DataTable.</returns>
         public static Dictionary<string, object>[] ToDictionary(this DataTable dataTable)
         {
             var items = new Dictionary<string, object>[dataTable.Rows.Count];
@@ -172,35 +250,6 @@ namespace pryLogger.src.Db
                 {
                     var value = row[column.ColumnName];
                     item.Add(column.ColumnName, DBNull.Value.Equals(value) ? null : value);
-                }
-
-                items[i] = item;
-            }
-
-            return items;
-        }
-
-        public static T[] CastTo<T>(this DataTable dataTable) where T : new()
-        {
-            var items = new T[dataTable.Rows.Count];
-            var properties = typeof(T).GetType().GetProperties();
-
-            for (int i = 0; i < items.Length; i++)
-            {
-                T item = new T();
-                DataRow row = dataTable.Rows[i];
-
-                foreach (var property in properties)
-                {
-                    if (!dataTable.Columns.Contains(property.Name))
-                    {
-                        continue;
-                    }
-
-                    var value = row[property.Name];
-                    var propertyValue = DBNull.Value.Equals(value) ? null : Convert.ChangeType(value, property.PropertyType);
-
-                    property.SetValue(item, propertyValue, null);
                 }
 
                 items[i] = item;
