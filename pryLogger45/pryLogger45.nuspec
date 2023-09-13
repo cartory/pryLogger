@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>pryLogger</id>
+    <version>0.2.0</version>
+    <title>pryLogger</title>
+    <authors>cartory</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <!-- <icon>icon.png</icon> -->
+    <iconUrl>https://play-lh.googleusercontent.com/tHZY62-jRcrHsK1cNctjdENAuPI-5EdRziKcesBcvg7VcpK75tDr5FeA9Xe-w1wxDUao</iconUrl>
+    <projectUrl>https://github.com/cartory/pryLogger.git</projectUrl>
+    <repository type="git" url="https://github.com/cartory/pryLogger.git" />
+    <description>
+      This library provides logging and event capabilities. 
+      It enables logging to files and the console, event management for REST APIs and databases, and database connection management. 
+      Additionally, it includes extensions for XML handling within a REST API
+    </description>
+    <releaseNotes>
+      - Added logging functionality to files, lite.db file and the console.
+      - Implemented event management for REST APIs and databases.
+      - Introduced database connection management.
+      - Included extensions for XML handling within a REST API.
+    </releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>Logs LogsAttributes LiteDb FileLog ConsoleLog Events RestEventLogs RestXmlExtensions DbEventLogs DbConnectionManager</tags>
+    <dependencies>
+      <group targetFramework="net45">
+        <dependency id="LiteDB" version="5.0.16" />
+        <dependency id="MrAdvice" version="2.9.9" />
+        <dependency id="Newtonsoft.Json" version="13.0.3" />
+      </group>
+    </dependencies>
+    <readme>README.md</readme>
+  </metadata>
+  <files>
+    <file src="..\README.md" />
+  </files>
+</package>
