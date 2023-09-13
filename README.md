@@ -10,33 +10,45 @@ This sample project demonstrates the usage of the `pryLogger` library for event 
 ## Usage Example
 
 ```csharp
-public static void onException(Exception ex) 
+public class Program
 {
-    Console.WriteLine($"catchException : {ex.Message}");
-}
+    public static void onException(Exception ex) 
+    {
+        Console.WriteLine($"catchException : {ex.Message}");
+    }
 
-[ConsoleLog(nameof(onException))]
-static void level1([LogRename("customParam")]string test = "lala land") 
-{
-    level2();
-    //var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("SELECT * FROM table u FETCH FIRST 10 ROWS ONLY");
-}
+    [ConsoleLog(nameof(onException))]
+    static void level1([LogRename("customParam")]string test = "lala land") 
+    {
+        level2();
+        //var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("select query. ...");
+        throw new Exception();
+    }
 
-[ConsoleLog(nameof(onException))]
-static void level2() 
-{
-    throw new Exception();
-}
+    [ConsoleLog(nameof(onException))]
+    static void level2() 
+    {
+        string url = "url";
+        var body = new {};
+        var res = RestClient.Fetch<object>(new RestRequest(url) 
+        {
+            Method = "POST",
+            Content = Soap.CreateXmlRequest("urlRequest", null, body, Declarations.UTF8),
+            ContentType = "text/xml; charset=UTF-8",
+        }, rest =>
+        {
+            object result  = Soap.FromXmlResponse("response", rest.Content);
+            return result;
+        });
+    }
 
-static readonly ConnectionManager<OracleConnection, OracleConnectionStringBuilder> instance = ConnectionManager<OracleConnection, OracleConnectionStringBuilder>.Instance;
+    static void Main(string[] args)
+    {
+        string connectionString = "database connection string";
+        MailErrorNotifier mailErrorNotifier = new MailErrorNotifier("host=mailhost; port=1234; from=cari@test.com; to=anothermail; repo=gitrepository.git");
+        ConnectionManager.Instance.SetConnectionString<OracleConnectionStringBuilder>(connectionString);
 
-static void Main(string[] args)
-{
-    string connectionString = "databaseConnectionString";
-    MailErrorNotifier mailErrorNotifier = new MailErrorNotifier("host=nomail.bg.com.bo; port=8888; from=cari@test; to=cari@test.com; repo=repo.git");
-    instance.SetConnectionString(connectionString);
-
-    //ConsoleLog.SetErrorNotifier(mailErrorNotifier);
-    level1();
-    Console.ReadKey();
+        level1();
+        Console.ReadKey();
+    }
 }
