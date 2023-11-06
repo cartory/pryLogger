@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>This library provides logging and event capabilities. 
+It enables logging to files and the console, event management for REST APIs and databases, and database connection management. 
+Additionally, it includes extensions for XML handling within a REST API</Description>
+    <PackageProjectUrl>https://github.com/cartory/pryLogger.git</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/cartory/pryLogger.git</RepositoryUrl>
+    <PackageTags>Logs LogsAttributes FileLog ConsoleLog Events RestEventLogs RestXmlExtensions DbEventLogs DbConnectionManager</PackageTags>
+    <PackageReleaseNotes>Version 1.0.0:
+      - Added logging functionality to files and the console.
+      - Implemented event management for REST APIs and databases.
+      - Introduced database connection management.
+      - Included extensions for XML handling within a REST API.</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>pryLogger</Title>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <IncludeSymbols>False</IncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.16" />
+    <PackageReference Include="MrAdvice" Version="2.9.9" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
