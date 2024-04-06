@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34601.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pryLogger40", "pryLogger40\pryLogger40.csproj", "{99482860-4C25-4676-B7E3-9F3F3447D9B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pryLogger45", "pryLogger45\pryLogger45.csproj", "{DD92C2B3-1592-4B96-A7A8-B07EB499FC7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pryLogger40Console", "pryLogger40Console\pryLogger40Console.csproj", "{E1641AAC-3328-4238-A3DA-A9BF3C6E388F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pryLogger45Console", "pryLogger45Console\pryLogger45Console.csproj", "{303BC506-D636-44EF-924C-0D480FFB6293}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99482860-4C25-4676-B7E3-9F3F3447D9B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99482860-4C25-4676-B7E3-9F3F3447D9B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99482860-4C25-4676-B7E3-9F3F3447D9B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99482860-4C25-4676-B7E3-9F3F3447D9B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD92C2B3-1592-4B96-A7A8-B07EB499FC7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD92C2B3-1592-4B96-A7A8-B07EB499FC7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD92C2B3-1592-4B96-A7A8-B07EB499FC7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD92C2B3-1592-4B96-A7A8-B07EB499FC7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1641AAC-3328-4238-A3DA-A9BF3C6E388F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1641AAC-3328-4238-A3DA-A9BF3C6E388F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1641AAC-3328-4238-A3DA-A9BF3C6E388F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1641AAC-3328-4238-A3DA-A9BF3C6E388F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{303BC506-D636-44EF-924C-0D480FFB6293}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{303BC506-D636-44EF-924C-0D480FFB6293}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{303BC506-D636-44EF-924C-0D480FFB6293}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{303BC506-D636-44EF-924C-0D480FFB6293}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08D278CF-9CE0-444C-A644-3F23EC69EF92}
+	EndGlobalSection
+EndGlobal
