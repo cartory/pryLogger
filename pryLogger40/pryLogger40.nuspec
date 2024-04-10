@@ -28,6 +28,9 @@
         <dependency id="Newtonsoft.Json" version="13.0.3" />
       </group>
     </dependencies>
+	  <frameworkAssemblies>
+		  <frameworkAssembly assemblyName=".NETFramework" targetFramework="net40" />
+	  </frameworkAssemblies>
     <readme>README.md</readme>
   </metadata>
   <files>
