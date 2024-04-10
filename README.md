@@ -8,57 +8,55 @@ This sample project demonstrates the usage of the `pryLogger` library for event 
 
 ## Usage Example
 
-```csharpusing System;
-using Oracle.ManagedDataAccess.Client;
+```
+using System;
+using System.Linq;
+using System.Text;
 
-using pryLogger.src.Rest;
-using pryLogger.src.Rest.Xml;
-using pryLogger.src.Log.Attributes;
-using pryLogger.src.Log.Strategies;
+using pryLogger.src.Logger.Loggers;
+using pryLogger.src.Logger.Loggers.FileLogger;
 
-using pryLogger.src.ErrorNotifier.MailNotifier;
+using pryLogger.src.Logger.Attributes;
 
-public class Program
+using pryLogger.src.Logger.ErrNotifiers.MailErrNotifier;
+using pryLogger.src.Logger.ErrNotifiers.RestErrNotifier;
+
+namespace pryLoggerConsole45
 {
-    public static void onException(Exception ex)
+    class Program
     {
-        Console.WriteLine($"catchException : {ex.Message}");
-    }
-
-    [ConsoleLog]
-    static void level1([LogRename("customParam")] string test = "lala land")
-    {
-        level2();
-        //var dt = ConnectionManager.Instance.GetConnection<OracleConnection>().SelectQuery("select query. ...");
-        throw new Exception();
-    }
-
-    [ConsoleLog(nameof(onException))]
-    static void level2()
-    {
-        string url = "url";
-        var body = new { };
-        var res = RestClient.Fetch<object>(new RestRequest(url)
+        [Log]
+        static string Hello([LogParam("personName")] string name)
         {
-            Method = "POST",
-            Content = Soap.CreateXmlRequest("urlRequest", null, body, Declarations.UTF8),
-            ContentType = "text/xml; charset=UTF-8",
-        }, rest =>
+            try
+            {
+                throw new Exception("test exception");
+            }
+            catch (Exception e)
+            {
+                LogAttribute.Current?.SetException(e);
+            }
+
+            return $"Hello, {name}";
+        }
+
+        static void Main(string[] args)
         {
-            object result = Soap.FromXmlResponse("response", rest.Content);
-            return result;
-        });
-    }
+            string fileConnectionString = "filename=log.txt; maxlines=1000";
+            string restConnectionString = "url=http://localhost:3000; method=post;";
+            string mailConnectionString = "host=smtp.gmail.com; port=587; from=cartoryy@gmail.com; to=cartoryy@gmail.com; password=...; ssl=true";
 
-    static void Main(string[] args)
-    {
-        string connectionString = "database connection string";
-        string mailConnectionString = "host=mailhost; port=1234; from=cari@test.com; to=anothermail; repo=gitrepository.git";
+            var mailErrNotifier = MailErrNotifier.FromConnectionString(mailConnectionString);
+            var fileLogger = new FileLogger(fileConnectionString);
 
-        ConsoleLog.MailErrorNotifier.SetConnectionString(mailConnectionString);
-        //ConnectionManager.Instance.SetConnectionString<OracleConnectionStringBuilder>(connectionString);
+            LogAttribute.Instance
+                .SetLoggers(ConsoleLogger.Instance, fileLogger)
+                .SetErrorNotifiers(mailErrNotifier, RestErrNotifier.FromConnectionString(restConnectionString));
 
-        level1();
-        Console.ReadKey();
+            Console.WriteLine("BEGIN");
+            Hello("pryLogger40");
+            Console.WriteLine("END");
+            Console.ReadKey();
+        }
     }
 }
