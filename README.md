@@ -1,10 +1,10 @@
 # pryLogger
 
-This sample project demonstrates the usage of the `pryLogger` library for event logging and error handling in a C# application. The application makes REST API calls and configures email notifications in case of errors.
+This sample project demonstrates the usage of the `pryLogger` library for event logging and error handling in a C# application. The application makes REST API calls and configures email/rest notifications in case of errors.
 
 ## Requirements
 
-- **Connection Database**: Ensure you have an database set up with a valid connection string, in this case is with Oracle
+- **Connection Database**: Ensure you have an database set up with a valid connection string
 
 ## Usage Example
 
